@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B6E4F">
+<meta name="description" content="Catat ceramah dengan rekam suara. Ayat Al-Qur'an dan hadits yang disebut ustadz langsung muncul lengkap dengan teks Arab dan terjemahnya.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>Catat Ceramah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap">
+<style>
+/* Layout: one narrow column like a notebook page; a fixed dock at the bottom holds the tools a thumb needs mid-lecture. */
+:root{
+  --paper:#F3F6F3; --surface:#FFFFFF; --sunk:#E9EEEA; --ink:#14211B; --muted:#5A6A62; --line:#D8E0DA;
+  --accent:#0B6E4F; --accent-ink:#FFFFFF; --accent-soft:#DDEFE7;
+  --ayat:#87570F; --ayat-bg:#FBF4E6; --ayat-line:#EBD9B4;
+  --hadits:#2C5687; --hadits-bg:#EDF2F9; --hadits-line:#CCDAEC;
+  --mark:#A8402C; --mark-bg:#FBEEEA; --mark-line:#F0CFC6;
+  --rec:#C42B37;
+  --shadow:0 10px 30px rgba(20,33,27,.10);
+  --f-ui:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-ar:"Scheherazade New","Amiri","Traditional Arabic","Geeza Pro",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1412; --surface:#151D1A; --sunk:#1B2521; --ink:#E5EDE8; --muted:#93A39B; --line:#26332D;
+  --accent:#3DB487; --accent-ink:#04140D; --accent-soft:#163428;
+  --ayat:#E3B868; --ayat-bg:#1F1A10; --ayat-line:#3B311C;
+  --hadits:#90B5E2; --hadits-bg:#111B27; --hadits-line:#22344A;
+  --mark:#EE8B76; --mark-bg:#281613; --mark-line:#4A2721;
+  --rec:#FF5E68; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1412; --surface:#151D1A; --sunk:#1B2521; --ink:#E5EDE8; --muted:#93A39B; --line:#26332D;
+  --accent:#3DB487; --accent-ink:#04140D; --accent-soft:#163428;
+  --ayat:#E3B868; --ayat-bg:#1F1A10; --ayat-line:#3B311C;
+  --hadits:#90B5E2; --hadits-bg:#111B27; --hadits-line:#22344A;
+  --mark:#EE8B76; --mark-bg:#281613; --mark-line:#4A2721;
+  --rec:#FF5E68; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.muted{color:var(--muted)}
+.ar{font-family:var(--f-ar);direction:rtl;text-align:right;font-size:1.6rem;line-height:2.15}
+.small{font-size:.85rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:.55rem .9rem;font-weight:600;font-size:.92rem;min-height:42px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.danger{color:var(--rec)}
+.btn svg{width:18px;height:18px;flex:none}
+.iconbtn{width:40px;height:40px;display:inline-grid;place-items:center;border-radius:10px;border:0;background:transparent;color:var(--muted)}
+.iconbtn:hover{background:var(--sunk);color:var(--ink)}
+.iconbtn svg{width:20px;height:20px}
+.pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;padding:.15rem .55rem;border-radius:99px;background:var(--sunk);color:var(--muted)}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* ---------- top bar ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:.5rem;min-height:56px}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:-.01em;font-size:1.08rem}
+.brand .seal{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-ar);font-size:1.15rem;line-height:1}
+.grow{flex:1;min-width:0}
+
+/* ---------- list view ---------- */
+.hero{padding-block:22px 6px}
+.hero h1{font-size:1.65rem;line-height:1.2;margin:0 0 .35rem;letter-spacing:-.02em;text-wrap:balance}
+.hero p{margin:0;color:var(--muted);max-width:60ch}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 8px}
+.how div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.how b{display:block;font-size:.9rem;margin-bottom:2px}
+.how span{font-size:.8rem;color:var(--muted);line-height:1.4;display:block}
+@media (max-width:560px){.how{grid-template-columns:1fr}}
+.listhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 10px;flex-wrap:wrap}
+.listhead h2{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.notes{display:grid;gap:10px;padding-bottom:40px}
+.note-card{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.note-card:hover{border-color:var(--muted)}
+.note-card h3{margin:0 0 2px;font-size:1.05rem;line-height:1.3}
+.note-card .meta{font-size:.82rem;color:var(--muted)}
+.note-card .counts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.c-ayat{background:var(--ayat-bg);color:var(--ayat)}
+.c-hadits{background:var(--hadits-bg);color:var(--hadits)}
+.c-mark{background:var(--mark-bg);color:var(--mark)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center}
+.empty p{margin:.2rem 0 1rem;color:var(--muted)}
+.empty .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* ---------- editor ---------- */
+.ed{padding-block:14px 230px}
+.ed-title{width:100%;border:0;background:transparent;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;padding:4px 0;outline:none}
+.ed-title::placeholder{color:var(--muted);opacity:.6}
+.ed-meta{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;margin:6px 0 14px}
+@media (max-width:560px){.ed-meta{grid-template-columns:1fr 1fr}.ed-meta .f-ustadz{grid-column:1/-1}}
+.field{display:flex;flex-direction:column;gap:2px;min-width:0}
+.field label{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.field input{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:.45rem .6rem;min-width:0;width:100%}
+.blocks{display:flex;flex-direction:column;gap:10px}
+.tblock{width:100%;border:0;background:transparent;resize:none;outline:none;font-size:1.02rem;line-height:1.65;padding:4px 0;min-height:2.2em;overflow:hidden}
+.tblock::placeholder{color:var(--muted);opacity:.7}
+.partial{color:var(--muted);font-style:italic;margin-top:-6px}
+.card{border-radius:16px;border:1px solid;padding:12px 14px 12px;position:relative;min-width:0}
+.card.ayat{background:var(--ayat-bg);border-color:var(--ayat-line)}
+.card.hadits{background:var(--hadits-bg);border-color:var(--hadits-line)}
+.card.mark{background:var(--mark-bg);border-color:var(--mark-line)}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.card-head .ref{font-weight:800;font-size:.88rem;letter-spacing:.01em}
+.card.ayat .ref{color:var(--ayat)} .card.hadits .ref{color:var(--hadits)} .card.mark .ref{color:var(--mark)}
+.card-head .iconbtn{width:32px;height:32px;margin-left:auto}
+.card-head .iconbtn + .iconbtn{margin-left:0}
+.card .ar{font-size:1.55rem}
+.card .tr{font-size:.95rem;margin-top:4px}
+.card .tr .n{font-weight:700;color:var(--muted);font-size:.78rem;margin-right:3px}
+.card .lat{font-size:.85rem;color:var(--muted);font-style:italic;margin-top:2px}
+.card .more{border:0;background:none;color:var(--hadits);font-weight:700;padding:0;font-size:.85rem}
+.card .ctx{font-style:italic;color:var(--muted);font-size:.9rem;margin:2px 0 8px}
+.card .acts{display:flex;gap:8px;flex-wrap:wrap}
+.ayah-end{font-family:var(--f-ar);color:var(--ayat);font-size:1.1rem;padding:0 .15em}
+
+/* ---------- dock ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+.dock .wrap{padding-block:8px 10px;display:flex;flex-direction:column;gap:8px}
+.sugs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.sugs:empty{display:none}
+.sug{flex:none;display:flex;align-items:center;gap:6px;border-radius:12px;padding:6px 6px 6px 10px;font-size:.85rem;border:1px solid}
+.sug.ayat{background:var(--ayat-bg);border-color:var(--ayat-line);color:var(--ayat)}
+.sug.hadits{background:var(--hadits-bg);border-color:var(--hadits-line);color:var(--hadits)}
+.sug b{font-weight:800}
+.sug button{border:0;border-radius:8px;padding:4px 8px;font-weight:700;font-size:.8rem;background:var(--surface);color:inherit}
+.sug .x{background:transparent;padding:4px}
+.tools{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;gap:8px}
+.tool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;border:1px solid var(--line);background:var(--surface);min-height:58px;font-size:.78rem;font-weight:700;padding:4px}
+.tool svg{width:22px;height:22px}
+.tool.rec{background:var(--accent);color:var(--accent-ink);border-color:transparent;flex-direction:row;gap:8px;font-size:.92rem}
+.tool.rec.on{background:var(--rec);color:#fff}
+.tool.rec.on .pulse{animation:pulse 1.2s ease-in-out infinite}
+.tool.rec[disabled]{opacity:.55}
+.tool.t-ayat{color:var(--ayat)} .tool.t-hadits{color:var(--hadits)} .tool.t-mark{color:var(--mark)}
+@keyframes pulse{50%{transform:scale(1.25);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.tool.rec.on .pulse{animation:none}}
+.rechint{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+
+/* ---------- sheet ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,12,9,.45);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:min(92%,860px);height:92%;background:var(--paper);border-radius:20px 20px 0 0;display:flex;flex-direction:column;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:760px){.sheet{left:50%;transform:translateX(-50%);width:720px}}
+.sheet-head{padding-top:10px;border-bottom:1px solid var(--line)}
+.sheet-head .wrap{display:flex;flex-direction:column;gap:10px;padding-block:0 12px}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 4px}
+.tabs{display:flex;gap:6px;align-items:center}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:.35rem .95rem;font-weight:700;font-size:.9rem}
+.tab[aria-selected="true"].ayat{background:var(--ayat);color:var(--surface);border-color:transparent}
+.tab[aria-selected="true"].hadits{background:var(--hadits);color:var(--surface);border-color:transparent}
+.search{display:flex;gap:8px}
+.search input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:.65rem .8rem;font-size:1rem}
+.search input:focus{border-color:var(--accent);outline:none}
+.examples{display:flex;gap:6px;flex-wrap:wrap}
+.ex{border:1px dashed var(--line);background:transparent;border-radius:99px;padding:.15rem .6rem;font-size:.78rem;color:var(--muted)}
+.books{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.book{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:.2rem .7rem;font-size:.8rem;font-weight:600;color:var(--muted)}
+.book[aria-pressed="true"]{background:var(--hadits-bg);color:var(--hadits);border-color:var(--hadits-line)}
+.ctxbox{background:var(--mark-bg);border:1px solid var(--mark-line);color:var(--ink);border-radius:12px;padding:8px 10px;font-size:.85rem}
+.ctxbox b{color:var(--mark)}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-body .wrap{padding-block:12px 40px;display:flex;flex-direction:column;gap:10px}
+.res{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.res .ref{font-weight:800;font-size:.86rem}
+.res.ayat .ref{color:var(--ayat)} .res.hadits .ref{color:var(--hadits)}
+.res .row{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.res .row .btn{margin-left:auto;min-height:36px;padding:.35rem .8rem}
+.res .ar{font-size:1.4rem;line-height:2}
+.res .tr{font-size:.92rem}
+.res mark{background:color-mix(in srgb,var(--ayat) 25%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.res.ai{border-style:dashed}
+.status{color:var(--muted);font-size:.9rem;text-align:center;padding:14px 4px}
+.ai-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-note{font-size:.8rem;color:var(--muted)}
+.range{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted)}
+.range input{width:64px;border:1px solid var(--line);border-radius:8px;padding:.25rem .4rem;background:var(--surface)}
+
+/* share sheet */
+.mini{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:760px){.mini{left:50%;transform:translateX(-50%);width:520px}}
+.mini .wrap{padding-block:12px 22px;display:flex;flex-direction:column;gap:8px}
+.mini h3{margin:4px 0 6px;font-size:1rem}
+.mini .btn{justify-content:flex-start;width:100%}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--paper);padding:.55rem 1rem;border-radius:12px;font-size:.9rem;font-weight:600;max-width:calc(100% - 32px);text-align:center}
+textarea.copybox{width:100%;height:140px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);font-size:.8rem}
+.loadbar{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.loadbar i{display:block;height:100%;width:40%;background:var(--accent);animation:slide 1.1s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+</style>
+
+</head><body>
+<div id="app"></div>
+
+<script>
+(() => {
+"use strict";
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const AR_DIG = "٠١٢٣٤٥٦٧٨٩";
+const arNum = n => String(n).replace(/\d/g, d => AR_DIG[d]);
+const uid = () => "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const nowTime = () => new Date().toLocaleTimeString("id-ID", {hour: "2-digit", minute: "2-digit"});
+const todayISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const fmtDate = iso => { try { return new Date(iso + "T00:00:00").toLocaleDateString("id-ID", {weekday: "long", day: "numeric", month: "long", year: "numeric"}); } catch { return iso; } };
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const stripAr = s => String(s).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g, "").replace(/[إأآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/\s+/g, "");
+const hasAr = s => /[؀-ۿ]/.test(s);
+const lower = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+const ICON = {
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5" class="pulse"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5z"/><path d="M12 6v14"/></svg>',
+  scroll: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h11a2 2 0 0 1 2 2v1h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7M7 4a2 2 0 0 1 2 2v0"/><path d="M9 10h6M9 14h6"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+};
+
+/* ================= surah names (ejaan Kemenag) ================= */
+const SURAH = "Al-Fatihah|Al-Baqarah|Ali 'Imran|An-Nisa'|Al-Ma'idah|Al-An'am|Al-A'raf|Al-Anfal|At-Taubah|Yunus|Hud|Yusuf|Ar-Ra'd|Ibrahim|Al-Hijr|An-Nahl|Al-Isra'|Al-Kahf|Maryam|Taha|Al-Anbiya'|Al-Hajj|Al-Mu'minun|An-Nur|Al-Furqan|Asy-Syu'ara'|An-Naml|Al-Qasas|Al-'Ankabut|Ar-Rum|Luqman|As-Sajdah|Al-Ahzab|Saba'|Fatir|Yasin|As-Saffat|Sad|Az-Zumar|Gafir|Fussilat|Asy-Syura|Az-Zukhruf|Ad-Dukhan|Al-Jasiyah|Al-Ahqaf|Muhammad|Al-Fath|Al-Hujurat|Qaf|Az-Zariyat|At-Tur|An-Najm|Al-Qamar|Ar-Rahman|Al-Waqi'ah|Al-Hadid|Al-Mujadilah|Al-Hasyr|Al-Mumtahanah|As-Saff|Al-Jumu'ah|Al-Munafiqun|At-Tagabun|At-Talaq|At-Tahrim|Al-Mulk|Al-Qalam|Al-Haqqah|Al-Ma'arij|Nuh|Al-Jinn|Al-Muzzammil|Al-Muddassir|Al-Qiyamah|Al-Insan|Al-Mursalat|An-Naba'|An-Nazi'at|'Abasa|At-Takwir|Al-Infitar|Al-Mutaffifin|Al-Insyiqaq|Al-Buruj|At-Tariq|Al-A'la|Al-Gasyiyah|Al-Fajr|Al-Balad|Asy-Syams|Al-Lail|Ad-Duha|Asy-Syarh|At-Tin|Al-'Alaq|Al-Qadr|Al-Bayyinah|Az-Zalzalah|Al-'Adiyat|Al-Qari'ah|At-Takasur|Al-'Asr|Al-Humazah|Al-Fil|Quraisy|Al-Ma'un|Al-Kausar|Al-Kafirun|An-Nasr|Al-Lahab|Al-Ikhlas|Al-Falaq|An-Nas".split("|");
+const ALIAS = {1:["fatiha","ummul kitab","alhamdu"],2:["baqoroh","baqara"],3:["imron","ali imron","al imran"],9:["bara'ah","taubat","tawbah"],17:["bani israil","isro"],20:["thaha","toha"],36:["yaasiin","yasiin","yaseen"],38:["shad"],40:["al-mu'min","ghafir"],47:["al-qital"],54:["qomar"],55:["rohman","arrohman"],56:["waqiah","waqiyah"],62:["jumat","jum'at"],67:["tabarak"],76:["ad-dahr"],94:["al-insyirah","alam nasyrah","insyiroh"],103:["wal asri","al ashr"],108:["kautsar","kautsar"],111:["al-masad","tabbat"],112:["qul huwallah","ikhlash"],113:["qul a'udzu birabbil falaq"],114:["qul a'udzu birabbin nas"]};
+function phonName(s) {
+  let t = lower(s).replace(/['`’‘ʼ]/g, "").replace(/[^a-z]/g, "");
+  t = t.replace(/^(al|an|ar|as|asy|ash|at|az|ad|adz|ats|ath)(?=[a-z]{3})/, "");
+  t = t.replace(/sy|sh|ts|th/g, "s").replace(/dz|dh|zh/g, "z").replace(/kh/g, "h").replace(/gh/g, "g").replace(/q/g, "k").replace(/ee/g, "i").replace(/oo|ou/g, "u").replace(/o/g, "a").replace(/e/g, "i").replace(/w/g, "u").replace(/y/g, "i");
+  t = t.replace(/h/g, "").replace(/(.)\1+/g, "$1");
+  return t;
+}
+const SURAH_KEYS = SURAH.map((n, i) => { const keys = new Set([phonName(n)]); (ALIAS[i + 1] || []).forEach(a => keys.add(phonName(a))); return [...keys]; });
+function lev(a, b) { if (a === b) return 0; const m = a.length, n = b.length; if (!m || !n) return m || n; let p = Array.from({length: n + 1}, (_, j) => j); for (let i = 1; i <= m; i++) { const c = [i]; for (let j = 1; j <= n; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[n]; }
+function findSurah(name, strict) {
+  const k = phonName(name); if (k.length < 2) return null;
+  let best = null;
+  SURAH_KEYS.forEach((keys, i) => keys.forEach(key => {
+    let d = lev(k, key);
+    if (!strict && key.startsWith(k) && k.length >= 3) d = Math.min(d, 0.5);
+    if (!best || d < best.d) best = {n: i + 1, d};
+  }));
+  const tol = strict ? (k.length >= 7 ? 1 : 0) : Math.max(1, Math.floor(k.length / 4));
+  return best && best.d <= tol ? best.n : null;
+}
+const surahLabel = n => SURAH[n - 1];
+const ayatRef = (s, a, b) => `QS. ${surahLabel(s)} [${s}]: ${a}${b && b !== a ? "–" + b : ""}`;
+
+/* ================= hadith books ================= */
+const BOOKS = [
+  {id: "arbain", name: "Arba'in Nawawi", short: "Arba'in"},
+  {id: "bukhari", name: "Bukhari"}, {id: "muslim", name: "Muslim"}, {id: "abu-daud", name: "Abu Daud"},
+  {id: "tirmidzi", name: "Tirmidzi"}, {id: "nasai", name: "Nasa'i"}, {id: "ibnu-majah", name: "Ibnu Majah"},
+  {id: "ahmad", name: "Ahmad"}, {id: "darimi", name: "Darimi"}, {id: "malik", name: "Malik"},
+];
+const BOOK_WORDS = [["arbain", /\barba'?i+n\b/], ["bukhari", /\bbu[ck]?h?ar[iy]\b/], ["muslim", /\bmuslim\b/], ["abu-daud", /\babu\s*da[uw]u?d\b/], ["tirmidzi", /\btirmi[dz]h?[iy]\b/], ["nasai", /\bnasa'?[iy]\b/], ["ibnu-majah", /\bibnu?\s*maja[h]?\b/], ["ahmad", /\b(imam\s+)?ahmad\b/], ["darimi", /\bdarimi\b/], ["malik", /\b(imam\s+)?malik\b/]];
+const bookName = id => (BOOKS.find(b => b.id === id) || {}).name || id;
+const hadithRef = (book, no) => book === "arbain" ? `Hadits Arba'in An-Nawawi no. ${no}` : `HR. ${bookName(book)} no. ${no}`;
+
+/* ================= data loading ================= */
+async function loadGz(path) {
+  const r = await fetch(path); if (!r.ok) throw new Error("http " + r.status);
+  const buf = await r.arrayBuffer(); const u = new Uint8Array(buf);
+  let text;
+  if (u[0] === 0x1f && u[1] === 0x8b) {
+    const ds = new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"));
+    text = await new Response(ds).text();
+  } else text = new TextDecoder().decode(u);
+  return JSON.parse(text);
+}
+let QURAN = null, QIDX = null, quranP = null;
+function phonVerse(s) {
+  let t = lower(s).replace(/[^a-z]/g, "");
+  t = t.replace(/sy|sh|ts|th/g, "s").replace(/dz|dh|zh/g, "z").replace(/kh/g, "h").replace(/gh/g, "g").replace(/q/g, "k").replace(/o/g, "a").replace(/e/g, "i").replace(/w/g, "u").replace(/y/g, "i");
+  t = t.replace(/l(([tsdznr])\2)/g, "$1").replace(/h/g, "").replace(/(.)\1+/g, "$1");
+  return t.replace(/[aiu]/g, "");
+}
+function getQuran() {
+  if (!quranP) quranP = loadGz("data/quran.json").then(q => {
+    QURAN = q; QIDX = [];
+    q.forEach(s => s.v.forEach((v, i) => QIDX.push({s: s.n, a: i + 1, id: lower(v[1]), ph: phonVerse(v[2]), ar: stripAr(v[0])})));
+    return q;
+  }).catch(e => { quranP = null; throw e; });
+  return quranP;
+}
+const HAD = {}, hadP = {};
+function getBook(id) {
+  if (!hadP[id]) hadP[id] = loadGz(`data/${id}.json`).then(rows => {
+    // arbain rows: [no,title,ar,id]; others: [no,ar,id]
+    const list = rows.map(r => id === "arbain" ? {no: r[0], title: r[1], ar: r[2], id: r[3]} : {no: r[0], ar: r[1], id: r[2]});
+    list.forEach(h => { h.lo = lower(h.id); });
+    const byNo = new Map(list.map(h => [h.no, h])); HAD[id] = {list, byNo}; return HAD[id];
+  }).catch(e => { delete hadP[id]; throw e; });
+  return hadP[id];
+}
+function verses(s, a, b) { const su = QURAN[s - 1]; if (!su) return []; const out = []; for (let i = a; i <= Math.min(b || a, su.v.length); i++) out.push([i, su.v[i - 1][0], su.v[i - 1][1], su.v[i - 1][2]]); return out; }
+
+/* ================= number words (Indonesia) ================= */
+const NUMW = {nol:0,satu:1,se:1,dua:2,tiga:3,empat:4,lima:5,enam:6,tujuh:7,delapan:8,sembilan:9,sepuluh:10,sebelas:11,seratus:100};
+function readNum(tokens, i) {
+  // returns [value, nextIndex] or null
+  if (i >= tokens.length) return null;
+  const t0 = tokens[i];
+  if (/^\d{1,4}$/.test(t0)) return [parseInt(t0, 10), i + 1];
+  let total = 0, cur = 0, j = i, any = false;
+  while (j < tokens.length) {
+    const t = tokens[j];
+    if (t in NUMW && t !== "se") { const v = NUMW[t]; if (v === 100) { total += 100; } else cur += v; any = true; j++; continue; }
+    if (t === "belas" && any) { cur += 10; j++; continue; }
+    if (t === "puluh" && any) { cur *= 10; j++; continue; }
+    if (t === "ratus" && any) { total += cur * 100; cur = 0; j++; continue; }
+    break;
+  }
+  return any ? [total + cur, j] : null;
+}
+
+/* ================= detection in spoken / typed text ================= */
+function detectRefs(text) {
+  const out = [];
+  const tokens = lower(text).replace(/[^a-z0-9'\-:\s]/g, " ").replace(/-/g, " ").split(/\s+/).filter(Boolean);
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    // QS 2:255
+    const m = (t === "qs" || t === "q.s") && tokens[i + 1] && tokens[i + 1].match(/^(\d{1,3}):(\d{1,3})$/);
+    if (m) { const s = +m[1], a = +m[2]; if (s >= 1 && s <= 114) out.push({type: "ayat", s, a, b: a}); continue; }
+    if (t === "ayat" || t === "ayah") {
+      const num = readNum(tokens, i + 1) || (tokens[i + 1] === "ke" ? readNum(tokens, i + 2) : null);
+      if (!num) continue;
+      let [a, nx] = num, b = a;
+      if (["sampai", "hingga", "sd", "s/d"].includes(tokens[nx])) { let k = nx + 1; if (tokens[k] === "dengan") k++; if (tokens[k] === "ayat") k++; const n2 = readNum(tokens, k); if (n2 && n2[0] > a) b = n2[0]; }
+      // look back for a surah name (up to 4 tokens, skipping "surat/surah/qs")
+      let s = null;
+      const stop = new Set(["surat", "surah", "suroh", "surat", "qs", "dalam", "di", "pada", "firman", "allah", "yang", "artinya"]);
+      for (let L = 3; L >= 1 && !s; L--) {
+        const start = i - L; if (start < 0) continue;
+        const words = tokens.slice(start, i).filter(w => !stop.has(w) && !/^\d+$/.test(w));
+        if (!words.length) continue;
+        const prev = tokens[start - 1] || "";
+        const cue = ["surat", "surah", "suroh", "qs"].includes(prev) || ["surat", "surah", "suroh", "qs"].includes(tokens[start]);
+        s = findSurah(words.join(" "), !cue);
+      }
+      if (s) { const len = QURAN ? QURAN[s - 1].v.length : 286; if (a >= 1 && a <= len) out.push({type: "ayat", s, a, b: Math.min(b, len)}); }
+      continue;
+    }
+  }
+  // hadith: "HR Bukhari", "riwayat Muslim nomor 12", "diriwayatkan oleh Imam Tirmidzi"
+  const low = lower(text);
+  const cue = /(\bhr\b|riwayat|diriwayatkan|hadits|hadis|hadist|imam)/g;
+  let mc;
+  while ((mc = cue.exec(low))) {
+    const tail = low.slice(mc.index, mc.index + 70);
+    for (const [id, re] of BOOK_WORDS) {
+      const mm = tail.match(re);
+      if (mm) {
+        const after = tail.slice(mm.index + mm[0].length);
+        const nm = after.match(/^\D{0,12}?(?:no\.?|nomor|nomer)\s*(\d{1,5})/);
+        out.push({type: "hadits", book: id, no: nm ? +nm[1] : null});
+        break;
+      }
+    }
+  }
+  return out;
+}
+const refKey = r => r.type === "ayat" ? `a${r.s}:${r.a}-${r.b}` : `h${r.book}:${r.no || ""}`;
+
+/* ================= storage ================= */
+const Store = {
+  notes: {}, mode: "local", db: null, uid: null, timers: {},
+  init() {
+    const cached = lsGet("cc.notes", {});
+    this.notes = cached && typeof cached === "object" ? cached : {};
+    this.connect();
+  },
+  async connect() {},
+  list() { return Object.values(this.notes).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); },
+  save(note, now) {
+    note.updatedAt = Date.now(); note.kind = "note";
+    this.notes[note.id] = note; lsSet("cc.notes", this.notes);
+    clearTimeout(this.timers[note.id]);
+    const push = () => { if (this.db) this.db.collection("data/users/" + this.uid).doc(note.id).set(JSON.parse(JSON.stringify(note))).catch(() => UI.refreshStatus(true)); };
+    if (now) push(); else this.timers[note.id] = setTimeout(push, 900);
+    UI.refreshStatus();
+  },
+  remove(id) {
+    delete this.notes[id]; lsSet("cc.notes", this.notes);
+    if (this.db) this.db.collection("data/users/" + this.uid).doc(id).delete().catch(() => {});
+    else { const d = lsGet("cc.deleted", []); d.push(id); lsSet("cc.deleted", d); }
+  },
+};
+
+/* ================= capabilities ================= */
+const Cap = {dict: null, sample: null, downloads: null, ready: false};
+function makeWebDict() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return null;
+  const H = {state: [], partial: [], final: []}; const emit = (k, v) => H[k].forEach(f => { try { f(v); } catch {} });
+  let rec = null, want = false, st = "idle", err = null, lang = "id-ID";
+  const android = /Android/i.test(navigator.userAgent);
+  const setSt = (s, reason) => { st = s; emit("state", reason ? {state: s, reason} : {state: s}); };
+  function begin(onStart, onFail) {
+    rec = new SR(); rec.lang = lang; rec.continuous = !android; rec.interimResults = true; rec.maxAlternatives = 1;
+    rec.onstart = () => { if (st !== "listening") setSt("listening"); onStart && onStart(); };
+    rec.onresult = e => { let interim = ""; for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; const t = (r[0] && r[0].transcript || "").trim(); if (!t) continue; if (r.isFinal) emit("final", {text: " " + t}); else interim += (interim ? " " : "") + t; } emit("partial", {text: interim}); };
+    rec.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { want = false; err = "not_granted"; onFail && onFail("not_granted"); } else if (e.error === "audio-capture") { want = false; err = "upstream_error"; onFail && onFail("upstream_error"); } else if (e.error === "network") { want = false; err = "network"; onFail && onFail("network"); } };
+    rec.onend = () => { emit("partial", {text: ""}); if (want) { setTimeout(() => { if (!want) { setSt("idle", "stopped"); return; } try { begin(); } catch { want = false; setSt("idle", "upstream_error"); } }, 150); } else setSt("idle", err || (document.hidden ? "hidden" : "stopped")); };
+    rec.start();
+  }
+  return {
+    start(opts) {
+      return new Promise((res, rej) => {
+        if (st !== "idle") { res(); return; }
+        lang = opts && opts.language && opts.language !== "id" ? opts.language : "id-ID";
+        want = true; err = null; setSt("starting");
+        try { begin(() => res(), code => rej({code})); } catch (e) { want = false; setSt("idle", "upstream_error"); rej({code: "upstream_error"}); }
+      });
+    },
+    stop() { want = false; if (rec && st !== "idle") { setSt("finishing"); try { rec.stop(); } catch { setSt("idle", "stopped"); } } return Promise.resolve(); },
+    onState(f) { H.state.push(f); }, onPartial(f) { H.partial.push(f); }, onFinal(f) { H.final.push(f); },
+  };
+}
+const webDownloads = {save({filename, data}) {
+  const url = URL.createObjectURL(new Blob([data], {type: "text/plain;charset=utf-8"}));
+  const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000); return Promise.resolve({status: "saved"});
+}};
+async function initCaps() {
+  const d = makeWebDict();
+  Cap.dict = d; Cap.sample = null; Cap.downloads = webDownloads; Cap.ready = true;
+  if (d) {
+    d.onState(({state: st, reason}) => { Rec.state = st; Rec.reason = reason; if (st === "idle") Rec.onIdle(reason); UI.refreshRec(); });
+    d.onPartial(({text}) => { Rec.partial = text; UI.refreshPartial(); });
+    d.onFinal(({text}) => Rec.onFinal(text));
+  }
+  UI.refreshRec();
+}
+
+/* ================= state ================= */
+const state = {view: "list", note: null, focus: null, sheet: null, share: false, sugs: [], dismissed: new Set()};
+
+/* ================= recording ================= */
+const Rec = {
+  state: "idle", partial: "", reason: null, wake: null, lang: "id",
+  toggle() {
+    const d = Cap.dict; if (!d) return;
+    if (this.state !== "idle") { d.stop().catch(() => {}); return; }
+    d.start({language: this.lang}).then(() => {
+      try { navigator.wakeLock && navigator.wakeLock.request("screen").then(w => this.wake = w).catch(() => {}); } catch {}
+    }).catch(e => {
+      if (e && e.code === "not_granted") toast("Izin mikrofon ditolak. Izinkan mikrofon di pengaturan situs browser, atau pakai mic di keyboard HP.");
+      else if (e && e.code === "network") toast("Rekam suara butuh internet. Periksa koneksi lalu coba lagi.");
+      else if (e && e.code === "rate_limited") toast("Mikrofon sedang sibuk. Coba lagi sebentar lagi.");
+      else if (e && e.code !== "stopped" && e.code !== "dismissed") toast("Rekaman tidak bisa dimulai. Coba lagi.");
+    });
+  },
+  onIdle(reason) {
+    this.partial = ""; UI.refreshPartial();
+    try { this.wake && this.wake.release(); } catch {} this.wake = null;
+    if (reason === "hidden") toast("Rekaman berhenti karena layar ditinggalkan. Ketuk Rekam untuk lanjut.");
+    if (reason === "time_limit") toast("Rekaman berhenti setelah 60 menit. Ketuk Rekam untuk lanjut.");
+  },
+  onFinal(text) {
+    const n = state.note; if (!n || !text) return;
+    let last = n.blocks[n.blocks.length - 1];
+    if (!last || last.type !== "text") { last = {type: "text", t: ""}; n.blocks.push(last); renderBlocks(); }
+    last.t = last.t ? last.t + text : text.replace(/^\s+/, "");
+    const idx = n.blocks.length - 1; const ta = document.querySelector(`textarea[data-i="${idx}"]`);
+    if (ta) { ta.value = last.t; autosize(ta); }
+    Store.save(n);
+    scanForSugs(last.t.slice(-320));
+    const dock = $(".dock"); if (ta && dock) { const r = ta.getBoundingClientRect(); const lim = dock.getBoundingClientRect().top - 20; if (r.bottom > lim) window.scrollBy({top: r.bottom - lim + 20, behavior: "smooth"}); }
+  },
+};
+
+/* ================= suggestions ================= */
+function scanForSugs(text) {
+  const refs = detectRefs(text); let changed = false;
+  refs.forEach(r => {
+    const k = refKey(r);
+    if (state.dismissed.has(k) || state.sugs.some(s => refKey(s) === k)) return;
+    // an ayat already in the note is not suggested again
+    if (state.note && state.note.blocks.some(b => (b.type === "ayat" && r.type === "ayat" && b.s === r.s && b.a === r.a) || (b.type === "hadits" && r.type === "hadits" && r.no && b.book === r.book && b.no === r.no))) return;
+    state.sugs.unshift(r); changed = true;
+  });
+  state.sugs = state.sugs.slice(0, 4);
+  if (changed) UI.refreshSugs();
+}
+
+/* ================= note ops ================= */
+function newNote(tpl) {
+  const n = Object.assign({id: uid(), title: "", ustadz: "", place: "", date: todayISO(), createdAt: Date.now(), blocks: [{type: "text", t: ""}]}, tpl || {});
+  Store.save(n, true); openNote(n.id);
+}
+function openNote(id) { state.note = Store.notes[id]; state.view = "edit"; state.sugs = []; state.dismissed = new Set(); state.focus = null; render(); window.scrollTo(0, 0); }
+function normalizeBlocks(n) {
+  const out = [];
+  n.blocks.forEach(b => { if (b.type === "text" && out.length && out[out.length - 1].type === "text") { const p = out[out.length - 1]; p.t = [p.t, b.t].filter(Boolean).join("\n"); } else out.push(b); });
+  const cleaned = out.filter((b, i) => !(b.type === "text" && !b.t && i !== out.length - 1 && i !== 0));
+  if (!cleaned.length || cleaned[cleaned.length - 1].type !== "text") cleaned.push({type: "text", t: ""});
+  n.blocks = cleaned;
+}
+function insertBlocks(newBlocks, opts = {}) {
+  const n = state.note; if (!n) return;
+  if (opts.replaceIndex != null && n.blocks[opts.replaceIndex]) {
+    n.blocks.splice(opts.replaceIndex, 1, ...newBlocks);
+  } else if (!opts.atEnd && state.focus && n.blocks[state.focus.i] && n.blocks[state.focus.i].type === "text") {
+    const {i, pos} = state.focus; const t = n.blocks[i].t || ""; const p = Math.min(pos ?? t.length, t.length);
+    n.blocks.splice(i, 1, {type: "text", t: t.slice(0, p).replace(/\s+$/, "")}, ...newBlocks, {type: "text", t: t.slice(p).replace(/^\s+/, "")});
+  } else {
+    n.blocks.push(...newBlocks);
+  }
+  normalizeBlocks(n); state.focus = null; Store.save(n); renderBlocks();
+}
+function ayatBlock(s, a, b) { return {type: "ayat", s, a, b: b || a, v: verses(s, a, b || a).map(x => [x[0], x[1], x[2]])}; }
+function hadithBlock(book, h) { return {type: "hadits", book, no: h.no, title: h.title || "", ar: h.ar, id: h.id}; }
+async function insertRef(r, opts) {
+  if (r.type === "ayat") { await getQuran(); insertBlocks([ayatBlock(r.s, r.a, r.b)], opts); toast(ayatRef(r.s, r.a, r.b) + " disisipkan"); return true; }
+  if (r.type === "hadits" && r.no) {
+    try { const B = await getBook(r.book); const h = B.byNo.get(r.no); if (h) { insertBlocks([hadithBlock(r.book, h)], opts); toast(hadithRef(r.book, r.no) + " disisipkan"); return true; } } catch {}
+  }
+  return false;
+}
+
+/* ================= export ================= */
+function noteToText(n) {
+  const L = [];
+  L.push("*" + (n.title || "Catatan Ceramah") + "*");
+  if (n.ustadz) L.push("Pemateri: " + n.ustadz);
+  const dp = [n.date ? fmtDate(n.date) : "", n.place].filter(Boolean).join(" · "); if (dp) L.push(dp);
+  L.push("");
+  n.blocks.forEach(b => {
+    if (b.type === "text") { if (b.t && b.t.trim()) { L.push(b.t.trim()); L.push(""); } }
+    else if (b.type === "ayat") {
+      L.push("_" + ayatRef(b.s, b.a, b.b) + "_");
+      L.push((b.v || []).map(v => v[1] + " ﴿" + arNum(v[0]) + "﴾").join(" "));
+      L.push("Artinya: " + (b.v || []).map(v => (b.v.length > 1 ? "(" + v[0] + ") " : "") + v[2]).join(" "));
+      L.push("");
+    } else if (b.type === "hadits") {
+      L.push("_" + hadithRef(b.book, b.no) + (b.title ? " — " + b.title : "") + "_");
+      L.push(b.ar); L.push("Artinya: " + b.id); L.push("");
+    } else if (b.type === "mark") {
+      L.push("[Ditandai " + b.time + ", ayat/hadits belum diisi" + (b.ctx ? ": \"" + b.ctx + "\"" : "") + "]"); L.push("");
+    }
+  });
+  L.push("— dicatat dengan Catat Ceramah");
+  return L.join("\n");
+}
+
+/* ================= UI ================= */
+let toastT;
+function toast(msg) { let t = $(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+function autosize(ta) { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; }
+
+const UI = {
+  refreshStatus(err) {
+    const el = $("#store-pill"); if (!el) return;
+    if (err) { el.innerHTML = '<span class="dot"></span>Gagal sinkron, tersimpan di HP'; return; }
+    el.innerHTML = '<span class="dot" style="color:var(--accent)"></span>Tersimpan di HP ini';
+  },
+  refreshRec() {
+    const b = $("#btn-rec"); if (!b) return;
+    const hint = $("#rec-hint");
+    if (!Cap.ready) { b.disabled = true; b.innerHTML = ICON.mic + "<span>Rekam</span>"; return; }
+    if (!Cap.dict) {
+      b.disabled = false; b.classList.remove("on"); b.innerHTML = ICON.mic + "<span>Rekam</span>"; b.dataset.na = "1";
+      if (hint) hint.hidden = true; return;
+    }
+    delete b.dataset.na; b.disabled = false;
+    const on = Rec.state !== "idle";
+    b.classList.toggle("on", on);
+    b.innerHTML = on ? ICON.stop + "<span>" + (Rec.state === "starting" ? "Menyiapkan…" : Rec.state === "finishing" ? "Menyimpan…" : "Berhenti") + "</span>" : ICON.mic + "<span>Rekam</span>";
+    if (hint) { hint.hidden = !on; hint.textContent = "Sedang mendengarkan. Sebut \"surat … ayat …\" atau \"HR Bukhari\" akan terdeteksi otomatis."; }
+  },
+  refreshPartial() {
+    const p = $("#partial"); if (!p) return; p.textContent = Rec.partial ? Rec.partial + " …" : ""; p.hidden = !Rec.partial;
+  },
+  refreshSugs() {
+    const box = $("#sugs"); if (!box) return;
+    box.innerHTML = state.sugs.map((r, i) => r.type === "ayat"
+      ? `<div class="sug ayat">Terdengar <b>${esc(ayatRef(r.s, r.a, r.b))}</b><button data-sug="${i}">Sisipkan</button><button class="x" data-sugx="${i}" aria-label="Abaikan">${ICON.x.replace('<svg', '<svg width="14" height="14"')}</button></div>`
+      : `<div class="sug hadits">Terdengar <b>${r.no ? esc(hadithRef(r.book, r.no)) : "hadits riwayat " + esc(bookName(r.book))}</b><button data-sug="${i}">${r.no ? "Sisipkan" : "Cari"}</button><button class="x" data-sugx="${i}" aria-label="Abaikan">${ICON.x.replace('<svg', '<svg width="14" height="14"')}</button></div>`).join("");
+  },
+  refreshAI() { const a = $("#ai-btn"); if (a) a.hidden = !Cap.sample; },
+};
+
+/* ---------- list view ---------- */
+function renderList() {
+  const notes = Store.list();
+  return `
+  <header class="top"><div class="wrap">
+    <div class="brand"><span class="seal" aria-hidden="true">ق</span>Catat Ceramah</div>
+    <div class="grow"></div>
+    <span class="pill" id="store-pill"></span>
+  </div></header>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Ustadz membaca ayat terlalu cepat? Biar aplikasi yang menuliskan.</h1>
+      <p>Rekam ceramah, lalu ayat dan hadits yang disebut langsung muncul lengkap dengan teks Arab dan terjemahnya. Gratis, tanpa daftar, catatan tersimpan di HP kamu.</p>
+      <div class="how">
+        <div><b>1. Rekam atau ketik</b><span>Ucapan ustadz jadi tulisan. Di HP, bisa juga pakai tombol mic di keyboard.</span></div>
+        <div><b>2. Ayat terdeteksi</b><span>Saat terdengar "surat Al-Baqarah ayat 255", tinggal ketuk Sisipkan.</span></div>
+        <div><b>3. Tandai kalau terlalu cepat</b><span>Ketuk Tandai, lanjut dengar. Cari ayat atau haditsnya setelah kajian.</span></div>
+      </div>
+    </section>
+    <div class="listhead"><h2>Catatan saya${notes.length ? " · " + notes.length : ""}</h2><button class="btn primary" data-act="new">${ICON.plus}Catatan baru</button></div>
+    <div class="notes">
+    ${notes.length ? notes.map(n => {
+      const c = {ayat: 0, hadits: 0, mark: 0}; n.blocks.forEach(b => { if (c[b.type] != null) c[b.type]++; });
+      return `<button class="note-card" data-open="${esc(n.id)}">
+        <h3>${esc(n.title || "Tanpa judul")}</h3>
+        <div class="meta">${esc([n.ustadz, n.date ? fmtDate(n.date) : ""].filter(Boolean).join(" · "))}</div>
+        <div class="counts">${c.ayat ? `<span class="pill c-ayat">${c.ayat} ayat</span>` : ""}${c.hadits ? `<span class="pill c-hadits">${c.hadits} hadits</span>` : ""}${c.mark ? `<span class="pill c-mark">${c.mark} belum diisi</span>` : ""}</div>
+      </button>`; }).join("") : `
+      <div class="empty">
+        <b>Belum ada catatan</b>
+        <p>Mulai catatan baru saat kajian dimulai, atau buka contoh untuk melihat hasilnya.</p>
+        <div class="row"><button class="btn primary" data-act="new">${ICON.plus}Catatan baru</button><button class="btn" data-act="example">Buka contoh catatan</button></div>
+      </div>`}
+    </div>
+  </main>`;
+}
+
+/* ---------- editor ---------- */
+function cardHTML(b, i) {
+  if (b.type === "ayat") {
+    const vs = b.v && b.v.length ? b.v : (QURAN ? verses(b.s, b.a, b.b).map(x => [x[0], x[1], x[2]]) : []);
+    return `<div class="card ayat"><div class="card-head"><span class="ref">${esc(ayatRef(b.s, b.a, b.b))}</span>
+      <button class="iconbtn" data-up="${i}" aria-label="Pindah ke atas">${ICON.up}</button><button class="iconbtn" data-del="${i}" aria-label="Hapus ayat ini">${ICON.x}</button></div>
+      <div class="ar" lang="ar">${vs.map(v => esc(v[1]) + `<span class="ayah-end">﴿${arNum(v[0])}﴾</span>`).join(" ")}</div>
+      <div class="tr">${vs.map(v => (vs.length > 1 ? `<span class="n">${v[0]}</span>` : "") + esc(v[2])).join(" ")}</div></div>`;
+  }
+  if (b.type === "hadits") {
+    const long = (b.ar || "").length > 420;
+    return `<div class="card hadits"><div class="card-head"><span class="ref">${esc(hadithRef(b.book, b.no))}${b.title ? " · " + esc(b.title) : ""}</span>
+      <button class="iconbtn" data-up="${i}" aria-label="Pindah ke atas">${ICON.up}</button><button class="iconbtn" data-del="${i}" aria-label="Hapus hadits ini">${ICON.x}</button></div>
+      <div class="ar" lang="ar" data-full="${long ? 0 : 1}">${esc(long && !b._open ? b.ar.slice(0, 380) + " …" : b.ar)}</div>
+      ${long ? `<button class="more" data-more="${i}">${b._open ? "Ringkas teks Arab" : "Tampilkan teks Arab lengkap"}</button>` : ""}
+      <div class="tr">${esc(b.id)}</div></div>`;
+  }
+  if (b.type === "mark") {
+    return `<div class="card mark"><div class="card-head"><span class="ref">Ditandai · ${esc(b.time)}</span>
+      <button class="iconbtn" data-del="${i}" aria-label="Hapus tanda">${ICON.x}</button></div>
+      ${b.ctx ? `<div class="ctx">"…${esc(b.ctx)}"</div>` : `<div class="ctx">Belum diisi. Cari setelah kajian selesai.</div>`}
+      <div class="acts"><button class="btn" data-fill="${i}">${ICON.book}Cari ayatnya</button><button class="btn" data-fillh="${i}">${ICON.scroll}Cari haditsnya</button></div></div>`;
+  }
+  return "";
+}
+function blocksHTML() {
+  const n = state.note; const lastText = n.blocks.length - 1;
+  return n.blocks.map((b, i) => b.type === "text"
+    ? `<textarea class="tblock" rows="1" data-i="${i}" placeholder="${i === 0 ? "Tulis atau rekam isi ceramah di sini…" : "Lanjutkan catatan…"}">${esc(b.t)}</textarea>${i === lastText ? '<div class="partial" id="partial" hidden></div>' : ""}`
+    : cardHTML(b, i)).join("");
+}
+function renderBlocks() {
+  const box = $("#blocks"); if (!box) return;
+  box.innerHTML = blocksHTML(); box.querySelectorAll("textarea").forEach(autosize); UI.refreshPartial();
+}
+function renderEditor() {
+  const n = state.note;
+  return `
+  <header class="top"><div class="wrap">
+    <button class="iconbtn" data-act="back" aria-label="Kembali ke daftar">${ICON.back}</button>
+    <div class="grow"><span class="pill" id="store-pill"></span></div>
+    <button class="btn ghost" data-act="share">${ICON.share}Bagikan</button>
+  </div></header>
+  <main class="wrap ed">
+    <input class="ed-title" id="f-title" placeholder="Judul kajian, misal: Keutamaan Sabar" value="${esc(n.title)}" autocomplete="off">
+    <div class="ed-meta">
+      <div class="field f-ustadz"><label for="f-ustadz">Pemateri</label><input id="f-ustadz" value="${esc(n.ustadz)}" placeholder="Nama ustadz"></div>
+      <div class="field"><label for="f-date">Tanggal</label><input id="f-date" type="date" value="${esc(n.date)}"></div>
+      <div class="field"><label for="f-place">Tempat</label><input id="f-place" value="${esc(n.place)}" placeholder="Masjid…"></div>
+    </div>
+    <div class="blocks" id="blocks">${blocksHTML()}</div>
+  </main>
+  <div class="dock"><div class="wrap">
+    <div class="sugs" id="sugs"></div>
+    <div class="tools">
+      <button class="tool rec" id="btn-rec" data-act="rec">${ICON.mic}<span>Rekam</span></button>
+      <button class="tool t-ayat" data-act="ayat">${ICON.book}Ayat</button>
+      <button class="tool t-hadits" data-act="hadits">${ICON.scroll}Hadits</button>
+      <button class="tool t-mark" data-act="mark">${ICON.flag}Tandai</button>
+    </div>
+    <p class="rechint" id="rec-hint" hidden></p>
+  </div></div>`;
+}
+
+/* ---------- search sheet ---------- */
+const SS = {tab: "ayat", q: "", books: new Set(["arbain", "bukhari", "muslim"]), ctx: "", replaceIndex: null, aiCtl: null, seq: 0, limit: 25};
+function openSheet(tab, opts = {}) {
+  SS.tab = tab; SS.q = opts.q || ""; SS.ctx = opts.ctx || ""; SS.replaceIndex = opts.replaceIndex ?? null; SS.limit = 25;
+  if (opts.book) SS.books = new Set([opts.book]);
+  state.sheet = true; renderSheet(); setTimeout(() => { const i = $("#s-q"); if (i && !opts.noFocus) i.focus(); }, 60);
+  runSearch();
+}
+function closeSheet() { state.sheet = false; SS.aiCtl && SS.aiCtl.abort(); const s = $("#sheet-root"); if (s) s.innerHTML = ""; document.body.style.overflow = ""; }
+function renderSheet() {
+  let root = $("#sheet-root"); if (!root) { root = document.createElement("div"); root.id = "sheet-root"; document.body.appendChild(root); }
+  document.body.style.overflow = "hidden";
+  const ay = SS.tab === "ayat";
+  root.innerHTML = `<div class="scrim" data-close="1"></div>
+  <div class="sheet" role="dialog" aria-label="Cari ${ay ? "ayat" : "hadits"}">
+    <div class="sheet-head"><div class="wrap">
+      <div class="grab" aria-hidden="true"></div>
+      <div class="tabs" role="tablist">
+        <button class="tab ayat" role="tab" aria-selected="${ay}" data-tab="ayat">Ayat Al-Qur'an</button>
+        <button class="tab hadits" role="tab" aria-selected="${!ay}" data-tab="hadits">Hadits</button>
+        <div class="grow"></div><button class="iconbtn" data-close="1" aria-label="Tutup">${ICON.x}</button>
+      </div>
+      ${SS.ctx ? `<div class="ctxbox"><b>Yang kamu tandai:</b> "…${esc(SS.ctx)}"</div>` : ""}
+      <form class="search" id="s-form" autocomplete="off">
+        <input id="s-q" type="search" enterkeyhint="search" value="${esc(SS.q)}" placeholder="${ay ? "Contoh: baqarah 255, 2:255, atau inna ma'al usri" : "Contoh: niat, sabar, bukhari 1"}">
+      </form>
+      ${ay ? `<div class="examples">${["al-baqarah 255", "2:153-157", "yasin 1-12", "inna ma'al usri yusro", "orang yang sabar"].map(e => `<button class="ex" data-ex="${esc(e)}">${esc(e)}</button>`).join("")}</div>`
+           : `<div class="books">${BOOKS.map(b => `<button class="book" aria-pressed="${SS.books.has(b.id)}" data-book="${b.id}">${esc(b.short || b.name)}</button>`).join("")}</div>`}
+      <div class="ai-row"><button class="btn" id="ai-btn" type="button" ${Cap.sample ? "" : "hidden"}>${ICON.spark}Tanya AI: ${ay ? "ayat" : "hadits"} mana ini?</button><span class="ai-note">${Cap.sample ? "Tulis potongan yang kamu dengar, AI menebak, kamu yang memastikan." : ""}</span></div>
+    </div></div>
+    <div class="sheet-body"><div class="wrap" id="s-res"></div></div>
+  </div>`;
+}
+function resultsEl() { return $("#s-res"); }
+function hl(text, terms) {
+  let s = esc(text); terms.filter(t => t.length > 2).forEach(t => { const re = new RegExp("(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi"); s = s.replace(re, "<mark>$1</mark>"); }); return s;
+}
+function ayatResHTML(s, a, b, terms = [], extra = "") {
+  const vs = verses(s, a, b);
+  const len = QURAN[s - 1].v.length;
+  return `<div class="res ayat${extra ? " ai" : ""}">
+    <div class="row"><span class="ref">${esc(ayatRef(s, a, b))}</span><button class="btn primary" data-ins-ayat="${s}:${a}:${b}">Sisipkan</button></div>
+    ${extra}
+    <div class="ar" lang="ar">${vs.map(v => esc(v[1]) + `<span class="ayah-end">﴿${arNum(v[0])}﴾</span>`).join(" ")}</div>
+    <div class="tr">${vs.map(v => (vs.length > 1 ? `<b class="muted small">${v[0]}</b> ` : "") + hl(v[2], terms)).join(" ")}</div>
+    <div class="range">Ambil ayat <input type="number" inputmode="numeric" min="1" max="${len}" value="${a}" data-ra="${s}" aria-label="Ayat awal"> sampai <input type="number" inputmode="numeric" min="1" max="${len}" value="${b}" data-rb="${s}" aria-label="Ayat akhir"></div>
+  </div>`;
+}
+function parseAyatQuery(q) {
+  q = q.trim(); if (!q) return null;
+  let m = q.match(/^(?:qs\.?\s*)?(\d{1,3})\s*[:.\s]\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?$/i);
+  if (m) { const s = +m[1]; if (s < 1 || s > 114) return null; return {s, a: +m[2], b: m[3] ? +m[3] : +m[2]}; }
+  m = q.match(/^(?:qs\.?|surat|surah)?\s*([a-z'’\-\s]+?)\s*(?:\[?\d{1,3}\]?)?\s*[:\s]\s*(?:ayat\s*)?(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?$/i);
+  if (m) { const s = findSurah(m[1]); if (s) return {s, a: +m[2], b: m[3] ? +m[3] : +m[2]}; }
+  m = q.match(/^(?:qs\.?|surat|surah)?\s*([a-z'’\-\s]+?)\s*$/i);
+  if (m && m[1].trim().split(/\s+/).length <= 3) { const s = findSurah(m[1]); if (s && phonName(m[1]).length >= 3) return {s, whole: true}; }
+  return null;
+}
+async function runSearch() {
+  const seq = ++SS.seq; const box = resultsEl(); if (!box) return;
+  const q = SS.q.trim();
+  if (SS.tab === "ayat") {
+    if (!QURAN) { box.innerHTML = '<div class="status">Memuat Al-Qur\'an…<div class="loadbar"><i></i></div></div>'; try { await getQuran(); } catch { box.innerHTML = '<div class="status">Data Al-Qur\'an gagal dimuat. Periksa internet lalu coba lagi.</div>'; return; } if (seq !== SS.seq) return; }
+    if (!q) { box.innerHTML = `<div class="status">Ketik nama surat dan nomor ayat, atau potongan bacaan/terjemah yang kamu ingat.${SS.ctx ? "<br>Kamu juga bisa tekan <b>Tanya AI</b> untuk menebak dari kalimat yang kamu tandai." : ""}</div>`; return; }
+    const p = parseAyatQuery(q);
+    if (p && p.whole) {
+      const su = QURAN[p.s - 1]; const max = Math.min(su.v.length, SS.limit);
+      let h = `<div class="status">${esc(surahLabel(p.s))} · ${su.v.length} ayat · ${esc(su.arti)}. Pilih ayatnya:</div>`;
+      for (let a = 1; a <= max; a++) h += ayatResHTML(p.s, a, a);
+      if (su.v.length > max) h += `<button class="btn" data-moreres="1">Tampilkan ayat berikutnya</button>`;
+      box.innerHTML = h; return;
+    }
+    if (p) {
+      const len = QURAN[p.s - 1].v.length;
+      if (p.a < 1 || p.a > len) { box.innerHTML = `<div class="status">${esc(surahLabel(p.s))} hanya punya ${len} ayat.</div>`; return; }
+      box.innerHTML = ayatResHTML(p.s, p.a, Math.min(Math.max(p.b, p.a), len)); return;
+    }
+    // free text search
+    const res = searchAyatText(q);
+    box.innerHTML = res.length ? `<div class="status">Ayat paling cocok dengan "${esc(q)}"</div>` + res.slice(0, SS.limit).map(r => ayatResHTML(r.s, r.a, r.a, r.terms)).join("") + (res.length > SS.limit ? `<button class="btn" data-moreres="1">Tampilkan lagi</button>` : "")
+      : `<div class="status">Tidak ada ayat yang cocok. Coba kata lain dari terjemahnya, atau tulis nama surat.${Cap.sample ? " Bisa juga tekan Tanya AI." : ""}</div>`;
+  } else {
+    const ids = [...SS.books];
+    if (!ids.length) { box.innerHTML = '<div class="status">Pilih minimal satu kitab di atas.</div>'; return; }
+    const missing = ids.filter(id => !HAD[id]);
+    if (missing.length) {
+      box.innerHTML = `<div class="status">Memuat kitab ${esc(missing.map(bookName).join(", "))}…<div class="loadbar"><i></i></div></div>`;
+      try { await Promise.all(missing.map(getBook)); } catch { if (seq === SS.seq) box.innerHTML = '<div class="status">Kitab gagal dimuat. Periksa internet lalu coba lagi.</div>'; return; }
+      if (seq !== SS.seq) return;
+    }
+    if (!q) { box.innerHTML = `<div class="status">Ketik kata dari isi hadits (misal: <b>niat</b>, <b>malu sebagian dari iman</b>) atau nama kitab dan nomornya (misal: <b>bukhari 1</b>).</div>`; return; }
+    const res = searchHadith(q, ids);
+    box.innerHTML = res.items.length ? `<div class="status">${res.total > 200 ? "200+" : res.total} hadits ditemukan</div>` + res.items.slice(0, SS.limit).map(r => hadResHTML(r.book, r.h, res.terms)).join("") + (res.items.length > SS.limit ? `<button class="btn" data-moreres="1">Tampilkan lagi</button>` : "")
+      : `<div class="status">Tidak ditemukan di kitab yang dipilih. Coba kata lain, atau pilih kitab lainnya.${Cap.sample ? " Bisa juga tekan Tanya AI." : ""}</div>`;
+  }
+}
+function searchAyatText(q) {
+  const out = [];
+  if (hasAr(q)) { const k = stripAr(q); if (k.length < 2) return out; QIDX.forEach(v => { if (v.ar.includes(k)) out.push({s: v.s, a: v.a, sc: 1, terms: []}); }); return out.slice(0, 200); }
+  const terms = lower(q).replace(/[^a-z0-9'\s]/g, " ").split(/\s+/).filter(t => t.length >= 2);
+  const ph = phonVerse(q);
+  const phTerms = q.split(/\s+/).map(phonVerse).filter(t => t.length >= 2);
+  QIDX.forEach(v => {
+    let sc = 0;
+    terms.forEach(t => { if (v.id.includes(t)) sc += t.length >= 4 ? 2 : 1; });
+    if (terms.length > 1 && v.id.includes(terms.join(" "))) sc += 6;
+    if (ph.length >= 4 && v.ph.includes(ph)) sc += 12;
+    else if (phTerms.length) { let hit = 0; phTerms.forEach(t => { if (v.ph.includes(t)) hit++; }); if (hit >= Math.max(2, Math.ceil(phTerms.length * 0.7))) sc += hit * 2; }
+    if (sc >= Math.min(3, terms.length * 2) && sc > 0) out.push({s: v.s, a: v.a, sc, terms});
+  });
+  out.sort((x, y) => y.sc - x.sc || x.s - y.s || x.a - y.a);
+  return out.slice(0, 200);
+}
+function searchHadith(q, ids) {
+  const items = []; let total = 0;
+  const lq = lower(q).trim();
+  // "bukhari 1" / "hr muslim no 12"
+  for (const [id, re] of BOOK_WORDS) { const m = lq.match(re); if (m) { const n = lq.slice(m.index + m[0].length).match(/(\d{1,5})/); if (n && HAD[id]) { const h = HAD[id].byNo.get(+n[1]); if (h) return {items: [{book: id, h}], total: 1, terms: []}; } else if (n && !SS.books.has(id)) { SS.books.add(id); renderSheet(); runSearch(); return {items: [], total: 0, terms: []}; } } }
+  if (/^\d{1,5}$/.test(lq)) { ids.forEach(id => { const h = HAD[id].byNo.get(+lq); if (h) items.push({book: id, h}); }); return {items, total: items.length, terms: []}; }
+  if (hasAr(q)) { const k = stripAr(q); ids.forEach(id => HAD[id].list.forEach(h => { if (stripAr(h.ar).includes(k)) { total++; if (items.length < 200) items.push({book: id, h, sc: 1}); } })); return {items, total, terms: []}; }
+  const terms = lq.replace(/[^a-z0-9'\s]/g, " ").split(/\s+/).filter(t => t.length >= 2 && !["dan", "yang", "di", "ke", "dari", "itu", "ini", "hr"].includes(t));
+  if (!terms.length) return {items, total, terms};
+  const phrase = terms.join(" ");
+  ids.forEach(id => HAD[id].list.forEach(h => {
+    if (!terms.every(t => h.lo.includes(t))) return;
+    total++;
+    let sc = 0; if (h.lo.includes(phrase)) sc += 10; if (h.title && lower(h.title).includes(terms[0])) sc += 5; sc += 2000 / (h.lo.length + 200); if (id === "arbain") sc += 3;
+    items.push({book: id, h, sc});
+  }));
+  items.sort((a, b) => b.sc - a.sc);
+  return {items: items.slice(0, 200), total, terms};
+}
+function snippet(text, terms, len = 340) {
+  if (text.length <= len) return hl(text, terms);
+  const lo = lower(text); let at = 0; for (const t of terms) { const i = lo.indexOf(t); if (i >= 0) { at = i; break; } }
+  const start = Math.max(0, at - 120);
+  return (start ? "… " : "") + hl(text.slice(start, start + len), terms) + " …";
+}
+function hadResHTML(book, h, terms = [], extra = "") {
+  return `<div class="res hadits${extra ? " ai" : ""}">
+    <div class="row"><span class="ref">${esc(hadithRef(book, h.no))}${h.title ? " · " + esc(h.title) : ""}</span><button class="btn primary" data-ins-had="${book}:${h.no}">Sisipkan</button></div>
+    ${extra}
+    <div class="ar" lang="ar" style="font-size:1.25rem">${esc(h.ar.length > 260 ? h.ar.slice(0, 240) + " …" : h.ar)}</div>
+    <div class="tr">${snippet(h.id, terms)}</div>
+  </div>`;
+}
+
+/* ---------- AI helper ---------- */
+async function askAI() {
+  const box = resultsEl(); if (!Cap.sample || !box) return;
+  const hint = [SS.q.trim(), SS.ctx].filter(Boolean).join("\n");
+  if (!hint) { toast("Tulis dulu potongan yang kamu dengar di kolom pencarian."); $("#s-q") && $("#s-q").focus(); return; }
+  SS.aiCtl && SS.aiCtl.abort(); SS.aiCtl = new AbortController();
+  const ay = SS.tab === "ayat"; const seq = ++SS.seq;
+  box.innerHTML = '<div class="status">AI sedang menebak…<div class="loadbar"><i></i></div></div>';
+  const prompt = ay
+    ? `Seseorang sedang mencatat ceramah dan tidak sempat menulis ayat Al-Qur'an yang dibacakan ustadz. Dari petunjuk berikut (bisa berupa potongan bacaan Arab yang ditulis dengan huruf latin dan ejaan tidak baku, potongan terjemah, tema, atau kalimat ustadz di sekitarnya), tebak ayat yang paling mungkin dimaksud.\n\nPetunjuk:\n"""${hint.slice(0, 1500)}"""\n\nBalas HANYA JSON array berisi maksimal 4 tebakan, urut dari yang paling yakin: [{"surah": nomor 1-114, "ayat_awal": nomor, "ayat_akhir": nomor, "alasan": "satu kalimat bahasa Indonesia"}]`
+    : `Seseorang sedang mencatat ceramah dan tidak sempat menulis hadits yang disampaikan ustadz. Dari petunjuk berikut (potongan matan Arab dalam huruf latin, potongan terjemah, tema, atau kalimat ustadz), tebak hadits yang paling mungkin dimaksud.\n\nPetunjuk:\n"""${hint.slice(0, 1500)}"""\n\nBalas HANYA JSON array berisi maksimal 4 tebakan: [{"kitab": salah satu dari "arbain","bukhari","muslim","abu-daud","tirmidzi","nasai","ibnu-majah","ahmad","darimi","malik", "kata_kunci": "2-4 kata bahasa Indonesia yang PASTI ada di terjemah hadits itu, dipisah spasi", "isi": "ringkasan isi hadits satu kalimat", "alasan": "satu kalimat"}]. Untuk hadits yang ada di Arba'in An-Nawawi, utamakan "arbain".`;
+  let guesses;
+  try { guesses = await Cap.sample.json(prompt, {signal: SS.aiCtl.signal}); }
+  catch (e) {
+    if (seq !== SS.seq) return;
+    box.innerHTML = `<div class="status">${e && e.code === "not_granted" ? "Fitur AI tidak diizinkan. Kamu tetap bisa mencari manual." : e && e.code === "rate_limited" ? "AI sedang sibuk. Coba lagi sebentar lagi." : e && e.code === "cancelled" ? "" : "AI belum bisa menjawab. Coba tulis petunjuk dengan kata lain."}</div>`;
+    if (e && e.code === "not_granted") { Cap.sample = null; UI.refreshAI(); }
+    return;
+  }
+  if (seq !== SS.seq) return;
+  if (!Array.isArray(guesses) || !guesses.length) { box.innerHTML = '<div class="status">AI tidak menemukan tebakan. Coba tambah petunjuk.</div>'; return; }
+  let h = '<div class="status">Tebakan AI. Teks di bawah diambil dari mushaf dan kitab asli, cocokkan dulu dengan yang kamu dengar sebelum menyisipkan.</div>';
+  if (ay) {
+    await getQuran();
+    guesses.slice(0, 4).forEach(g => {
+      const s = +g.surah, a = +g.ayat_awal, b = +(g.ayat_akhir || g.ayat_awal);
+      if (!(s >= 1 && s <= 114)) return; const len = QURAN[s - 1].v.length; if (!(a >= 1 && a <= len)) return;
+      h += ayatResHTML(s, a, Math.min(Math.max(b, a), len, a + 9), [], `<div class="ai-note">${ICON.spark.replace("<svg", '<svg width="13" height="13"')} ${esc(g.alasan || "")}</div>`);
+    });
+  } else {
+    for (const g of guesses.slice(0, 4)) {
+      const id = BOOKS.some(b => b.id === g.kitab) ? g.kitab : "bukhari";
+      try { await getBook(id); } catch { continue; }
+      const terms = lower(g.kata_kunci || "").split(/\s+/).filter(t => t.length >= 3);
+      let found = terms.length ? HAD[id].list.filter(x => terms.every(t => x.lo.includes(t))) : [];
+      if (!found.length && terms.length > 1) found = HAD[id].list.filter(x => terms.filter(t => x.lo.includes(t)).length >= terms.length - 1);
+      found.sort((a, b) => a.lo.length - b.lo.length);
+      h += `<div class="res hadits ai"><div class="ref">${esc(bookName(id))}: ${esc(g.isi || "")}</div><div class="ai-note">${esc(g.alasan || "")}</div></div>`;
+      h += found.slice(0, 3).map(x => hadResHTML(id, x, terms)).join("") || `<div class="status">Teksnya belum ketemu di kitab ${esc(bookName(id))}. Coba cari manual dengan kata "${esc(g.kata_kunci || "")}".</div>`;
+    }
+  }
+  box.innerHTML = h;
+}
+
+/* ---------- share sheet ---------- */
+function openShare() {
+  let root = $("#sheet-root"); if (!root) { root = document.createElement("div"); root.id = "sheet-root"; document.body.appendChild(root); }
+  const n = state.note;
+  root.innerHTML = `<div class="scrim" data-close="1"></div><div class="mini" role="dialog" aria-label="Bagikan catatan"><div class="wrap">
+    <div class="grab" aria-hidden="true"></div>
+    <h3>${esc(n.title || "Catatan tanpa judul")}</h3>
+    <button class="btn" data-sh="copy">${ICON.copy}Salin teks (siap tempel ke WhatsApp)</button>
+    ${Cap.downloads ? `<button class="btn" data-sh="txt">${ICON.down}Unduh sebagai file .txt</button>` : ""}
+    <button class="btn danger" data-sh="del">${ICON.trash}Hapus catatan ini</button>
+    <div id="sh-extra"></div>
+    <button class="btn ghost" data-close="1">Tutup</button>
+  </div></div>`;
+}
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); toast("Teks disalin. Tempel di WhatsApp atau aplikasi catatan."); return; } catch {}
+  const ex = $("#sh-extra"); if (ex) { ex.innerHTML = `<p class="small muted">Salin otomatis tidak tersedia. Tekan lama teks di bawah, pilih semua, lalu salin.</p><textarea class="copybox" readonly>${esc(txt)}</textarea>`; const ta = ex.querySelector("textarea"); ta.focus(); ta.select(); }
+}
+
+/* ================= render & events ================= */
+function render() {
+  const app = $("#app");
+  app.innerHTML = state.view === "edit" && state.note ? renderEditor() : renderList();
+  if (state.view === "edit") { app.querySelectorAll("textarea").forEach(autosize); UI.refreshRec(); UI.refreshSugs(); }
+  UI.refreshStatus();
+}
+
+const debSave = (() => { let t; return () => { clearTimeout(t); t = setTimeout(() => state.note && Store.save(state.note), 400); }; })();
+const debScan = (() => { let t; return txt => { clearTimeout(t); t = setTimeout(() => scanForSugs(txt), 1200); }; })();
+
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.matches("textarea.tblock")) { const i = +t.dataset.i; const b = state.note.blocks[i]; if (b) { b.t = t.value; autosize(t); state.focus = {i, pos: t.selectionStart}; debSave(); const p = t.selectionStart; debScan(t.value.slice(Math.max(0, p - 200), p + 20)); } return; }
+  if (state.note && ["f-title", "f-ustadz", "f-date", "f-place"].includes(t.id)) { state.note[{"f-title": "title", "f-ustadz": "ustadz", "f-date": "date", "f-place": "place"}[t.id]] = t.value; debSave(); return; }
+  if (t.id === "s-q") { SS.q = t.value; SS.limit = 25; clearTimeout(SS.qt); SS.qt = setTimeout(runSearch, 250); return; }
+  if (t.dataset.ra || t.dataset.rb) return;
+});
+document.addEventListener("focusin", e => { const t = e.target; if (t.matches && t.matches("textarea.tblock")) state.focus = {i: +t.dataset.i, pos: t.selectionStart}; });
+document.addEventListener("selectionchange", () => { const t = document.activeElement; if (t && t.matches && t.matches("textarea.tblock")) state.focus = {i: +t.dataset.i, pos: t.selectionStart}; });
+document.addEventListener("submit", e => { e.preventDefault(); if (e.target.id === "s-form") { clearTimeout(SS.qt); runSearch(); $("#s-q") && $("#s-q").blur(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#sheet-root") && $("#sheet-root").innerHTML) closeSheet(); });
+
+document.addEventListener("click", async e => {
+  const el = e.target.closest("button, .scrim"); if (!el) return;
+  const d = el.dataset;
+  if (d.close) { closeSheet(); return; }
+  if (d.open) { openNote(d.open); return; }
+  if (d.act === "new") { newNote(); return; }
+  if (d.act === "example") { await makeExample(); return; }
+  if (d.act === "back") { if (Rec.state !== "idle" && Cap.dict) Cap.dict.stop().catch(() => {}); state.note && Store.save(state.note, true); state.view = "list"; state.note = null; render(); window.scrollTo(0, 0); return; }
+  if (d.act === "rec") {
+    if (el.dataset.na) { toast("Browser ini belum mendukung rekam suara. Buka link ini di Google Chrome, atau ketuk kolom catatan lalu pakai tombol mic di keyboard HP."); return; }
+    Rec.toggle(); return;
+  }
+  if (d.act === "ayat" || d.act === "hadits") { openSheet(d.act); return; }
+  if (d.act === "mark") {
+    const n = state.note; const lastT = [...n.blocks].reverse().find(b => b.type === "text");
+    const ctx = ((lastT && lastT.t) || "").slice(-140).replace(/^\S*\s/, "").trim();
+    insertBlocks([{type: "mark", kind: "ayat", time: nowTime(), ctx}], {atEnd: Rec.state !== "idle"});
+    toast("Ditandai. Lanjutkan mendengar, isi ayatnya nanti."); return;
+  }
+  if (d.act === "share") { openShare(); return; }
+  if (d.sh === "copy") { await copyText(noteToText(state.note)); return; }
+  if (d.sh === "txt") { const n = state.note; try { await Cap.downloads.save({filename: (n.title || "catatan-ceramah").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").slice(0, 60) + ".txt", data: noteToText(n)}); toast("File disimpan."); } catch (err) { if (!err || err.code !== "declined") toast("File belum bisa diunduh. Pakai Salin teks saja."); } return; }
+  if (d.sh === "del") { const ex = $("#sh-extra"); ex.innerHTML = `<p class="small">Catatan ini akan dihapus permanen.</p><button class="btn danger" data-sh="del2">${ICON.trash}Ya, hapus</button>`; return; }
+  if (d.sh === "del2") { Store.remove(state.note.id); closeSheet(); state.view = "list"; state.note = null; render(); toast("Catatan dihapus."); return; }
+  if (d.del != null) { const n = state.note; n.blocks.splice(+d.del, 1); normalizeBlocks(n); Store.save(n); renderBlocks(); return; }
+  if (d.up != null) { const n = state.note, i = +d.up; let j = i - 1; while (j >= 0 && n.blocks[j].type === "text" && !n.blocks[j].t) j--; if (j < 0) return; const [b] = n.blocks.splice(i, 1); n.blocks.splice(j, 0, b); normalizeBlocks(n); Store.save(n); renderBlocks(); return; }
+  if (d.more != null) { const b = state.note.blocks[+d.more]; b._open = !b._open; renderBlocks(); return; }
+  if (d.fill != null || d.fillh != null) { const i = +(d.fill ?? d.fillh); const b = state.note.blocks[i]; openSheet(d.fillh != null ? "hadits" : "ayat", {ctx: b.ctx, replaceIndex: i, noFocus: true}); return; }
+  if (d.sug != null) {
+    const r = state.sugs[+d.sug]; state.sugs.splice(+d.sug, 1); state.dismissed.add(refKey(r)); UI.refreshSugs();
+    const ok = await insertRef(r, {atEnd: true});
+    if (!ok && r.type === "hadits") openSheet("hadits", {book: r.book, noFocus: true});
+    return;
+  }
+  if (d.sugx != null) { const r = state.sugs[+d.sugx]; state.sugs.splice(+d.sugx, 1); state.dismissed.add(refKey(r)); UI.refreshSugs(); return; }
+  // sheet
+  if (d.tab) { SS.tab = d.tab; SS.limit = 25; const keepQ = SS.q; renderSheet(); $("#s-q").value = keepQ; runSearch(); return; }
+  if (d.ex) { SS.q = d.ex; $("#s-q").value = d.ex; runSearch(); return; }
+  if (d.book) { if (SS.books.has(d.book)) SS.books.delete(d.book); else SS.books.add(d.book); el.setAttribute("aria-pressed", SS.books.has(d.book)); runSearch(); return; }
+  if (el.id === "ai-btn") { askAI(); return; }
+  if (d.moreres) { SS.limit += 25; runSearch(); return; }
+  if (d.insAyat) {
+    const [s, a0, b0] = d.insAyat.split(":").map(Number); const res = el.closest(".res");
+    let a = +(res.querySelector("[data-ra]")?.value || a0), b = +(res.querySelector("[data-rb]")?.value || b0);
+    const len = QURAN[s - 1].v.length; a = Math.min(Math.max(1, a || a0), len); b = Math.min(Math.max(a, b || a), len);
+    const rep = SS.replaceIndex; closeSheet(); insertBlocks([ayatBlock(s, a, b)], rep != null ? {replaceIndex: rep} : {atEnd: Rec.state !== "idle"}); toast(ayatRef(s, a, b) + " disisipkan"); return;
+  }
+  if (d.insHad) {
+    const [book, no] = d.insHad.split(":"); const h = HAD[book].byNo.get(+no);
+    const rep = SS.replaceIndex; closeSheet(); insertBlocks([hadithBlock(book, h)], rep != null ? {replaceIndex: rep} : {atEnd: Rec.state !== "idle"}); toast(hadithRef(book, h.no) + " disisipkan"); return;
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target; if (!t.dataset || !(t.dataset.ra || t.dataset.rb)) return;
+  const res = t.closest(".res"); const s = +(t.dataset.ra || t.dataset.rb);
+  let a = +res.querySelector("[data-ra]").value, b = +res.querySelector("[data-rb]").value; const len = QURAN[s - 1].v.length;
+  a = Math.min(Math.max(1, a || 1), len); b = Math.min(Math.max(a, b || a), len, a + 19);
+  const tmp = document.createElement("div"); tmp.innerHTML = ayatResHTML(s, a, b); res.replaceWith(tmp.firstElementChild);
+});
+
+async function makeExample() {
+  try { await getQuran(); } catch { toast("Data Al-Qur'an gagal dimuat. Coba lagi."); return; }
+  let had = null; try { const A = await getBook("arbain"); had = A.byNo.get(1); } catch {}
+  const blocks = [
+    {type: "text", t: "Ustadz membuka kajian dengan menjelaskan bahwa sabar bukan berarti diam. Sabar itu menahan diri dari keluh kesah sambil terus berusaha. Allah berfirman dalam surat Al-Baqarah ayat 153:"},
+    ayatBlock(2, 153, 153),
+    {type: "text", t: "Tiga jenis sabar: sabar dalam ketaatan, sabar menjauhi maksiat, dan sabar menghadapi musibah. Semua amal itu harus diawali niat yang lurus, sebagaimana hadits pertama dalam Arba'in:"},
+  ];
+  if (had) blocks.push(hadithBlock("arbain", had));
+  blocks.push({type: "text", t: "Ustadz lalu membaca ayat tentang kemudahan setelah kesulitan, terlalu cepat untuk dicatat, jadi ditandai dulu:"});
+  blocks.push({type: "mark", kind: "ayat", time: "20.14", ctx: "fa inna ma'al usri yusro, inna ma'al usri yusro, sesungguhnya bersama kesulitan ada kemudahan"});
+  blocks.push({type: "text", t: ""});
+  newNote({title: "Contoh: Keutamaan Sabar", ustadz: "(contoh) Ustadz Fulan", place: "Masjid Al-Ikhlas", blocks});
+}
+
+/* ================= boot ================= */
+Store.init();
+render();
+initCaps();
+getQuran().catch(() => {});
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+
+</body></html>
